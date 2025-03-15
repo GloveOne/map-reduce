@@ -25,8 +25,8 @@ function flatMapG<A, B>(array: Array<A>, fn: (item: A) => Array<B>): Array<B> {
 
 Deno.test("map test", () => {
   assertEquals(
-    mapG([1, 2, 3], (n) => n ** 2),
-    [1, 4, 9]
+    mapG([1, 2, 3, 4], (n) => n ** 2),
+    [1, 4, 9, 16]
   );
 });
 
