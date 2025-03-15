@@ -61,6 +61,8 @@ function forEachG<A, B>(array: Array<A>, fn: (item: A) => B): undefined {
   }
 }
 
+forEachG([1, 2, 3, 4, 5, 6], console.log);
+
 Deno.test("map test", () => {
   assertEquals(
     mapG([1, 2, 3, 4], (n) => n ** 2),
