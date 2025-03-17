@@ -24,7 +24,7 @@ function flatMapG<A, B>(
   return flatmappedCollection;
 }
 //return array.reduce(
-//  (result: Array<B>, item: A) => [...result, ...fn(item)],
+//  (result: Array<B>, item: A) => [...result, ...mapFunction(item)],
 //  []
 //);
 
