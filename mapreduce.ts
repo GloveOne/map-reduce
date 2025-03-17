@@ -1,63 +1,99 @@
 import { assertEquals } from "jsr:@std/assert";
 
-function mapG<A, B>(array: Array<A>, fn: (item: A) => B): Array<B> {
-  const arr: Array<B> = [];
-  for (const item of array) {
-    arr.push(fn(item));
+function mapG<A, B>(
+  collection: Array<A>,
+  mapFunction: (item: A) => B
+): Array<B> {
+  const mappedCollection: Array<B> = [];
+  for (const item of collection) {
+    mappedCollection.push(mapFunction(item));
   }
-  return arr;
+  return mappedCollection;
 }
 
-function flatMapG<A, B>(array: Array<A>, fn: (item: A) => Array<B>): Array<B> {
-  //const arr: Array<B> = [];
-  //for(const item of array){
-  //for(const innerItem of item){
-  //arr.push(fn(item))
-  //}
-  //}
-  return array.reduce(
-    (result: Array<B>, item: A) => [...result, ...fn(item)],
-    []
-  );
-}
-
-function filterG<A>(array: Array<A>, fn: (item: A) => boolean): Array<A> {
-  const arr: Array<A> = [];
-  for (const i of array) {
-    if (fn(i)) arr.push(i);
+function flatMapG<A, B>(
+  collection: Array<A>,
+  mapFunction: (item: A) => Array<B>
+): Array<B> {
+  const flatmappedCollection: Array<B> = [];
+  for (const itemOfTypeA of collection) {
+    for (const itemOfTypeB of mapFunction(itemOfTypeA)) {
+      flatmappedCollection.push(itemOfTypeB);
+    }
   }
-  return arr;
+  return flatmappedCollection;
+}
+//return array.reduce(
+//  (result: Array<B>, item: A) => [...result, ...fn(item)],
+//  []
+//);
+
+function filterG<A>(
+  collection: Array<A>,
+  filterFunction: (item: A) => boolean
+): Array<A> {
+  const filteredCollection: Array<A> = [];
+  for (const item of collection) {
+    if (filterFunction(item)) filteredCollection.push(item);
+  }
+  return filteredCollection;
 }
 
 function reduceG<A, B>(
-  array: Array<A>,
-  initValue: B,
-  redFn: (i: B, j: A) => B
+  collection: Array<A>,
+  reducerFunction: (value: B, item: A) => B,
+  initialValue: B
 ): B {
-  let arr: B = initValue;
-  for (const i of array) {
-    arr = redFn(arr, i);
+  let reducedValue: B = initialValue;
+  for (const item of collection) {
+    reducedValue = reducerFunction(reducedValue, item);
   }
-  return arr;
+  return reducedValue;
 }
 
-function everyG<A>(array: Array<A>, boFn: (item: A) => boolean): boolean {
-  for (const i of array) {
-    if (!boFn(i)) return false;
+function reduceG2<A>(
+  collection: Array<A>,
+  reducerFunction: (value: A, item: A) => A,
+  initialValue?: A
+): A {
+  if (initialValue === undefined) {
+    let reducedValue = collection[0];
+    for (let _i = 1; _i <= collection.length; _i++) {
+      reducedValue = reducerFunction(reducedValue, collection[_i]);
+    }
+    return reducedValue;
+  } else {
+    let reducedValue: A = initialValue;
+    for (const item of collection) {
+      reducedValue = reducerFunction(reducedValue, item);
+    }
+    return reducedValue;
+  }
+}
+
+function everyG<A>(
+  collection: Array<A>,
+  proposition: (item: A) => boolean
+): boolean {
+  for (const item of collection) {
+    if (!proposition(item)) return false;
   }
   return true;
 }
 
-function someG<A>(array: Array<A>, boFn: (item: A) => boolean): boolean {
-  for (const i of array) {
-    if (boFn(i)) return true;
+function someG<A>(
+  collection: Array<A>,
+  proposition: (item: A) => boolean
+): boolean {
+  for (const item of collection) {
+    if (proposition(item)) return true;
   }
   return false;
 }
 
-function forEachG<A, B>(array: Array<A>, fn: (item: A) => B): undefined {
-  for (const i of array) {
-    fn(i);
+function forEachG<A, B>(collection: Array<A>, method: (item: A) => B): void {
+  for (const item of collection) {
+    method(item);
   }
 }
 
@@ -93,18 +129,33 @@ Deno.test("filter", () => {
 
 Deno.test("Reduce", () => {
   assertEquals(
-    reduceG([1, 2, 3, 4, 5, 6, 7, 8, 9], 0, (n, m) => n + m),
+    reduceG([1, 2, 3, 4, 5, 6, 7, 8, 9], (n, m) => n + m, 0),
     45
   );
   assertEquals(
-    reduceG([1, 2, 3, 4, 5, 6, 7, 8, 9], 1, (n, m) => n * m),
+    reduceG([1, 2, 3, 4, 5, 6, 7, 8, 9], (n, m) => n * m, 1),
     362880
   );
 });
 
 Deno.test("Reduce2.0", () => {
   assertEquals(
-    reduceG([1, 2, 3, 4, 5, 6, 7, 8, 9], 1, (n, m) => n ** m),
+    reduceG([1, 2, 3, 4, 5, 6, 7, 8, 9], (n, m) => n ** m, 1),
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].reduce((n, m) => n ** m, 1)
+  );
+});
+
+Deno.test("ReduceG2 tests", () => {
+  assertEquals(
+    reduceG2([1, 2, 3, 4, 5, 6, 7, 8, 9], (n, m) => n + m, 0),
+    45
+  );
+  assertEquals(
+    reduceG2([1, 2, 3, 4, 5, 6, 7, 8, 9], (n, m) => n * m, 1),
+    362880
+  );
+  assertEquals(
+    reduceG2([1, 2, 3, 4, 5, 6, 7, 8, 9], (n, m) => n ** m, 1),
     [1, 2, 3, 4, 5, 6, 7, 8, 9].reduce((n, m) => n ** m, 1)
   );
 });
